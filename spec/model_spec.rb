@@ -7,7 +7,7 @@ describe "Model" do
 
   it "should have the right schema" do
     Person.new.should be_a_kind_of Person
-    Person.oclass_name.should == 'person'
+    Person.oclass_name.should == 'Person'
     Person.fields.keys.should == [:name, :age, :tags]
     Person.fields[:name].should == {:type => :string, :not_null => true}
     Person.fields[:age].should == {:type => :int}
