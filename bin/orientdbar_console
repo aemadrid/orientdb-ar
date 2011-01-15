@@ -1,0 +1,32 @@
+#!/usr/bin/env jruby
+require File.expand_path(File.dirname(__FILE__) + "/../lib/orientdb-ar")
+
+if ARGV.include?('test:db')
+  GEM_ROOT     = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+  SPEC_ROOT    = GEM_ROOT + '/spec'
+  TEMP_DIR     = File.expand_path Dir.pwd + '/tmp'
+
+  TEST_DB_PATH = "#{TEMP_DIR}/databases/db_#{rand(999) + 1}"
+
+  puts ">> GEM_ROOT     : #{GEM_ROOT}"
+  puts ">> TEST_DB PATH : #{TEST_DB_PATH}"
+
+  require 'fileutils'
+  puts ">> Removing tmp directory #{TEMP_DIR} ..."
+  FileUtils.remove_dir TEMP_DIR + '/databases', true
+  puts ">> Creating OrientDB test database ..."
+  FileUtils.mkdir_p TEST_DB_PATH
+  OrientDB::AR::Base.connection = OrientDB::Database.new("local:#{TEST_DB_PATH}/test").create
+  DB = OrientDB::AR::Base.connection
+  puts ">> Connection : #{OrientDB::AR::Base.connection}"
+
+  require SPEC_ROOT + '/models/person'
+  require SPEC_ROOT + '/models/simple_person'
+  require SPEC_ROOT + '/models/address'
+  require SPEC_ROOT + '/models/customer'
+  require SPEC_ROOT + '/models/flo_admin'
+end
+
+require 'irb'
+ARGV.clear
+IRB.start(__FILE__)
