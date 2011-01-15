@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   ]
   s.files = [
     ".document",
+    ".gemspec",
     ".gitignore",
     "LICENSE",
     "README.rdoc",
@@ -33,6 +34,7 @@ Gem::Specification.new do |s|
     "lib/model/embedded.rb",
     "lib/model/validations.rb",
     "lib/orientdb-ar.rb",
+    "orientdb-ar.gemspec",
     "spec/base_spec.rb",
     "spec/dirty_spec.rb",
     "spec/lint_behavior.rb",
