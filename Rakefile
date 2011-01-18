@@ -11,13 +11,13 @@ begin
     gem.authors                   = ["Adrian Madrid"]
     gem.email                     = ["aemadrid@gmail.com"]
     gem.homepage                  = "http://rubygems.org/gems/orientdb"
-    gem.summary                   = "JRuby wrapper for OrientDB"
-    gem.description               = "Simple JRuby wrapper for the OrientDB."
+    gem.summary                   = "ActiveRecord-like persistency through OrientDB in JRuby"
+    gem.description               = "Active Model wrappers to persist Ruby objects under OrientDB in JRuby."
 
     gem.required_rubygems_version = ">= 1.3.6"
     gem.rubyforge_project         = "orientdb-ar"
 
-    gem.add_dependency "orientdb", "0.0.7"
+    gem.add_dependency "orientdb", "0.0.10"
     gem.add_dependency "activemodel", ">= 3.0.3"
     gem.add_development_dependency "awesome_print"
     gem.add_development_dependency "rspec", ">= 2.4"
@@ -31,22 +31,6 @@ begin
 rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
   end
-
-begin
-  require 'jeweler'
-  Jeweler::Tasks.new do |gem|
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
-    gem.email = "aemadrid@gmail.com"
-    gem.homepage = "http://github.com/aemadrid/orientdb-ar"
-    gem.authors = ["Adrian Madrid"]
-    gem.add_development_dependency "rspec", ">= 1.2.9"
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
-  end
-  Jeweler::GemcutterTasks.new
-rescue LoadError
-  puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
-end
 
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec)

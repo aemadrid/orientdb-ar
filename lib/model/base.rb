@@ -11,6 +11,7 @@ require 'model/validations'
 
 class OrientDB::AR::Base
   include ActiveModel::AttributeMethods
+  include Comparable
 
   extend ActiveModel::Translation
   extend ActiveModel::Callbacks
@@ -104,12 +105,16 @@ class OrientDB::AR::Base
   end
 
   def inspect
-    attrs = attributes.map { |k, v| "#{k}:#{v.inspect}" }.join(' ')
+    attrs       = attributes.map { |k, v| "#{k}:#{v.inspect}" }.join(' ')
     super_klass = self.class.descends_from_base? ? '' : "(#{self.class.superclass.name})"
     %{#<#{self.class.name}#{super_klass}:#{@odocument.rid} #{attrs}>}
   end
 
   alias :to_s :inspect
+
+  def <=>(other)
+    to_s <=> other.to_s
+  end
 
   class << self
 
@@ -123,8 +128,8 @@ class OrientDB::AR::Base
       unless defined?(@oclass)
         options = {}
         unless descends_from_base?
-          super_oclass = superclass.oclass
-          options[:super] = super_oclass
+          super_oclass          = superclass.oclass
+          options[:super]       = super_oclass
           options[:use_cluster] = super_oclass.cluster_ids.first
         end
         @oclass = connection.get_or_create_class oclass_name, options
@@ -162,28 +167,83 @@ class OrientDB::AR::Base
       obj
     end
 
-    def all(options = {})
-      options.update :oclass => oclass_name
-      connection.all(options).map{|doc| new_from_doc doc }
+    def select(*args)
+      OrientDB::AR::Query.new(self).select(*args)
     end
 
-    def first(options = {})
-      options.update :oclass => oclass_name
-      new_from_doc connection.first(options)
+    alias :columns :select
+
+    def where(*args)
+      OrientDB::AR::Query.new(self).where(*args)
     end
 
-    def query(options = {})
-      options.update :oclass => oclass_name
-      connection.query(options).map{|doc| new_from_doc doc }
+    def order(*args)
+      OrientDB::AR::Query.new(self).order(*args)
+    end
+
+    def limit(max_records)
+      OrientDB::AR::Query.new(self).limit(max_records)
+    end
+
+    def range(lower_rid, upper_rid = nil)
+      OrientDB::AR::Query.new(self).range(lower_rid, upper_rid)
+    end
+
+    def all(conditions = {})
+      OrientDB::AR::Query.new(self).where(conditions).all
+    end
+
+    def first(conditions = {})
+      OrientDB::AR::Query.new(self).where(conditions).first
+    end
+
+    def clear
+      oclass.truncate
     end
 
     def new_from_doc(doc)
       klass = doc.getClassName.constantize
-      obj = klass.new
+      obj   = klass.new
       obj.instance_variable_set "@odocument", doc
       obj
     end
   end
+
+end
+
+class OrientDB::AR::Query
+
+  attr_accessor :model, :query
+
+  def initialize(model, query = OrientDB::SQL::Query.new)
+    @model, @query = model, query
+    @query.from model.name
+  end
+
+  %w{ select select! where where! and or and_not or_not order order! limit limit! range range! }.each do |name|
+    define_method(name) do |*args|
+      query.send name, *args
+      self
+    end
+  end
+
+  def all
+    model.connection.query(query).map { |doc| model.new_from_doc doc }
+  end
+
+  def first
+    model.new_from_doc model.connection.first(query)
+  end
+
+  def results
+    model.connection.query(query).map
+  end
+
+  def inspect
+    %{#<OrientDB::AR::Query:#{model.name} query="#{query.to_s}">}
+  end
+
+  alias :to_s :inspect
 
 end
 
