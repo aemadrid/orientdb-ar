@@ -5,14 +5,14 @@
 
 Gem::Specification.new do |s|
   s.name = %q{orientdb-ar}
-  s.version = "0.0.1"
+  s.version = "0.0.2"
   s.platform = %q{jruby}
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.3.6") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Madrid"]
-  s.date = %q{2011-01-14}
+  s.date = %q{2011-01-17}
   s.default_executable = %q{orientdbar_console}
-  s.description = %q{Simple JRuby wrapper for the OrientDB.}
+  s.description = %q{Active Model wrappers to persist Ruby objects under OrientDB in JRuby.}
   s.email = ["aemadrid@gmail.com"]
   s.executables = ["orientdbar_console"]
   s.extra_rdoc_files = [
@@ -53,25 +53,25 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{orientdb-ar}
   s.rubygems_version = %q{1.3.6}
-  s.summary = %q{JRuby wrapper for OrientDB}
+  s.summary = %q{ActiveRecord-like persistency through OrientDB in JRuby}
 
   if s.respond_to? :specification_version then
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<orientdb>, ["= 0.0.7"])
+      s.add_runtime_dependency(%q<orientdb>, ["= 0.0.10"])
       s.add_runtime_dependency(%q<activemodel>, [">= 3.0.3"])
       s.add_development_dependency(%q<awesome_print>, [">= 0"])
       s.add_development_dependency(%q<rspec>, [">= 2.4"])
     else
-      s.add_dependency(%q<orientdb>, ["= 0.0.7"])
+      s.add_dependency(%q<orientdb>, ["= 0.0.10"])
       s.add_dependency(%q<activemodel>, [">= 3.0.3"])
       s.add_dependency(%q<awesome_print>, [">= 0"])
       s.add_dependency(%q<rspec>, [">= 2.4"])
     end
   else
-    s.add_dependency(%q<orientdb>, ["= 0.0.7"])
+    s.add_dependency(%q<orientdb>, ["= 0.0.10"])
     s.add_dependency(%q<activemodel>, [">= 3.0.3"])
     s.add_dependency(%q<awesome_print>, [">= 0"])
     s.add_dependency(%q<rspec>, [">= 2.4"])
