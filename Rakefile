@@ -17,7 +17,7 @@ begin
     gem.required_rubygems_version = ">= 1.3.6"
     gem.rubyforge_project         = "orientdb-ar"
 
-    gem.add_dependency "orientdb", "0.0.10"
+    gem.add_dependency "orientdb", "0.0.11"
     gem.add_dependency "activemodel", ">= 3.0.3"
     gem.add_development_dependency "awesome_print"
     gem.add_development_dependency "rspec", ">= 2.4"
