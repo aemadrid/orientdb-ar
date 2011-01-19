@@ -28,6 +28,7 @@ unless defined?(SPEC_HELPER_LOADED)
 
   require SPEC_ROOT + '/models/person'
   require SPEC_ROOT + '/models/simple_person'
+  require SPEC_ROOT + '/models/phone_number'
   require SPEC_ROOT + '/models/address'
   require SPEC_ROOT + '/models/customer'
 

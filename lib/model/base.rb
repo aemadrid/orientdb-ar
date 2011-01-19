@@ -8,6 +8,8 @@ require 'orientdb'
 require 'model/conversion'
 require 'model/attributes'
 require 'model/validations'
+require 'model/relations'
+require 'model/query'
 
 class OrientDB::AR::Base
   include ActiveModel::AttributeMethods
@@ -33,9 +35,10 @@ class OrientDB::AR::Base
   attr_reader :odocument
 
   def initialize(fields = {})
-    @odocument          = self.class.new_document fields
+    @odocument          = self.class.new_document
     @changed_attributes = {}
     @errors             = ActiveModel::Errors.new(self)
+    fields.each { |k, v| send "#{k}=", v }
   end
 
   def field?(name)
@@ -118,6 +121,8 @@ class OrientDB::AR::Base
 
   class << self
 
+    include OrientDB::AR::Relations
+
     attr_writer :oclass_name
 
     def oclass_name
@@ -137,6 +142,10 @@ class OrientDB::AR::Base
       @oclass
     end
 
+    def embedded?
+      false
+    end
+
     def field(name, type, options = {})
       name = name.to_sym
       if fields.key? name
@@ -154,6 +163,7 @@ class OrientDB::AR::Base
       fields.each do |field, options|
         oclass.add field, options[:type], options.except(:type)
       end
+      self
     end
 
     def new_document(fields = {})
@@ -207,43 +217,11 @@ class OrientDB::AR::Base
       obj.instance_variable_set "@odocument", doc
       obj
     end
-  end
 
-end
-
-class OrientDB::AR::Query
-
-  attr_accessor :model, :query
-
-  def initialize(model, query = OrientDB::SQL::Query.new)
-    @model, @query = model, query
-    @query.from model.name
-  end
-
-  %w{ select select! where where! and or and_not or_not order order! limit limit! range range! }.each do |name|
-    define_method(name) do |*args|
-      query.send name, *args
-      self
+    def new_from_docs(docs)
+      docs.map { |doc| new_from_doc doc }
     end
   end
-
-  def all
-    model.connection.query(query).map { |doc| model.new_from_doc doc }
-  end
-
-  def first
-    model.new_from_doc model.connection.first(query)
-  end
-
-  def results
-    model.connection.query(query).map
-  end
-
-  def inspect
-    %{#<OrientDB::AR::Query:#{model.name} query="#{query.to_s}">}
-  end
-
-  alias :to_s :inspect
 
 end
 
