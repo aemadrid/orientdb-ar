@@ -16,7 +16,7 @@ if ARGV.include?('test:db')
   FileUtils.remove_dir TEMP_DIR + '/databases', true
   puts ">> Creating OrientDB test database ..."
   FileUtils.mkdir_p TEST_DB_PATH
-  OrientDB::AR::Base.connection = OrientDB::Database.new("local:#{TEST_DB_PATH}/test").create
+  OrientDB::AR::Base.connection = OrientDB::DocumentDatabase.new("local:#{TEST_DB_PATH}/test").create
   DB = OrientDB::AR::Base.connection
   puts ">> Connection : #{OrientDB::AR::Base.connection}"
 

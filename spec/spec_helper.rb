@@ -23,7 +23,7 @@ unless defined?(SPEC_HELPER_LOADED)
   FileUtils.remove_dir TEMP_DIR + '/test', true
   puts ">> Creating OrientDB database..."
   FileUtils.mkdir_p TEST_DB_PATH
-  OrientDB::AR::Base.connection = OrientDB::Database.new("local:#{TEST_DB_PATH}/test").create
+  OrientDB::AR::Base.connection = OrientDB::DocumentDatabase.new("local:#{TEST_DB_PATH}/test").create
   puts ">> Connection : #{OrientDB::AR::Base.connection}"
 
   require SPEC_ROOT + '/models/person'

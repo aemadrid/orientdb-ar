@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe "Model" do
 
   it "should have a valid connection" do
-    Person.connection.should be_a_kind_of OrientDB::Database
+    Person.connection.should be_a_kind_of OrientDB::DocumentDatabase
   end
 
   it "should have the right schema" do
