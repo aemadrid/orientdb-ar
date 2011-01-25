@@ -15,11 +15,11 @@ class OrientDB::AR::Query
   end
 
   def all
-    model.connection.query(query).map { |doc| model.new_from_doc doc }
+    model.connection.all(query).map { |doc| doc.to_orientdb_ar }
   end
 
   def first
-    model.new_from_doc model.connection.first(query)
+    model.connection.first(query).to_orientdb_ar
   end
 
   def results

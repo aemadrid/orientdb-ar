@@ -12,12 +12,17 @@ module OrientDB::AR
       attribute_names.inject({}) { |h, attr| h[attr.to_s] = self[attr]; h }
     end
 
+    def to_orientdb
+      @odocument
+    end
+
     def [](attr)
       res = @odocument[attr]
-      res.respond_to?(:jruby_value) ? res.jruby_value : res
+      res.respond_to?(:to_orientdb_ar) ? res.to_orientdb_ar : res
     end
 
     def []=(attr, value)
+      value = value.respond_to?(:to_orientdb) ? value.to_orientdb : value
       old_value = self[attr]
       return old_value if value == old_value
       attribute_will_change!(attr)

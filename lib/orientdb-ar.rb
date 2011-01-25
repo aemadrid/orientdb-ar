@@ -5,5 +5,7 @@ module OrientDB
   end
 end
 
+require 'model/document_mixin'
 require 'model/base'
 require 'model/embedded'
+require 'model/ext'

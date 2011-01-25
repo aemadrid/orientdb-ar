@@ -9,66 +9,42 @@ module OrientDB::AR
 
       class_eval <<-eorb, __FILE__, __LINE__ + 1
         def #{name}                                                          # def address
-          doc = odocument[:#{name}]                                          #   doc = odocument[:address]
-          doc ? #{klass.name}.new_from_doc(doc) : nil                        #   doc ? Address.new_from_doc(doc) : nil
+          self[:#{name}]                                                     #   self[:address]
         end                                                                  # end
       eorb
-                                                                             #
+
       class_eval <<-eorb, __FILE__, __LINE__ + 1
         def #{name}=(value)                                                  # def address=(value)
-          raise "Invalid value for [#{name}]" unless value.is_a?(#{klass})   #   raise "Invalid value for [address]" unless value.is_a?(Address)
-          odocument[:#{name}] = value.odocument                              #   odocument[:address] = value.odocument
+          self[:#{name}] = value                                             #   self[:address] = value.odocument
           #{name}                                                            #   address
         end                                                                  # end
       eorb
     end
 
-    def belongs_to(klass, options = {})
-      klass = klass_for klass
-      name = options.delete(:name) || field_name_for(klass, true)
-
-      field name, [OrientDB::FIELD_TYPES[:link], klass.oclass]
-
-      class_eval <<-eorb, __FILE__, __LINE__ + 1
-        def #{name}                                                          # def address
-          doc = odocument[:#{name}]                                          #   doc = odocument[:address]
-          doc ? #{klass.name}.new_from_doc(doc) : nil                        #   doc ? Address.new_from_doc(doc) : nil
-        end                                                                  # end
-      eorb
-                                                                             #
-      class_eval <<-eorb, __FILE__, __LINE__ + 1
-        def #{name}=(value)                                                  # def address=(value)
-          raise "Invalid value for [#{name}]" unless value.is_a?(#{klass})   #   raise "Invalid value for [address]" unless value.is_a?(Address)
-          odocument[:#{name}] = value.odocument                              #   odocument[:address] = value.odocument
-          #{name}                                                            #   address
-        end                                                                  # end
-      eorb
-    end
-
-    def has_many(klass, options = {})
+    def embedds_many(klass, options = {})
       klass = klass_for klass
       name = options[:name].to_s || field_name_for(klass, false)
 
-      field_type = klass.embedded? ? :embedded : :link
-      field name, [OrientDB::FIELD_TYPES[field_type], klass.oclass]
+      field name, [OrientDB::FIELD_TYPES[:embedded_list], klass.oclass]
 
       class_eval <<-eorb, __FILE__, __LINE__ + 1
         def #{name}                                         # def addresses
-          docs = odocument[:#{name}]                        #   docs = odocument[:addresses]
-          docs ? #{klass.name}.new_from_docs(docs) : nil    #   docs ? Address.new_from_docs(doc) : nil
+          self[:#{name}]                                    #   self[:addresses]
         end                                                 # end
       eorb
 
       class_eval <<-eorb, __FILE__, __LINE__ + 1
         def #{name}=(value)                                 # def addresses=(value)
-          odocument[:#{name}] = value.map{|x| x.odocument } #   odocument[:addresses] = value.map{|x| x.odocument }
-          #{name}                                           #   addresses
+          puts "#{name}=(\#{value.inspect})"
+          self[:#{name}]                                    #   self[:addresses]
         end                                                 # end
       eorb
 
       class_eval <<-eorb, __FILE__, __LINE__ + 1
-        def add_#{name.to_s.singularize}(value)             # def add_address(value)
-          odocument[:#{name}] << value.odocument            #   odocument[:addresses] << value.odocument
+        def add_#{name.singularize}(value)                  # def add_address(value)
+          puts "add_#{name}=(\#{value.inspect})"
+          self[:#{name}] ||= []                             #   self[:addresses] ||= []
+          self[:#{name}] << value                           #   self[:addresses] << value
           #{name}                                           #   addresses
         end                                                 # end
       eorb

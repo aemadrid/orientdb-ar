@@ -54,6 +54,10 @@ describe "Model" do
     Person.where(:age.gt(28), :age.lt(75)).all.should == [p1, p5]
     Person.where("'jedi' IN tags").all.should == [p2, p3]
     Person.where("'fighter' IN tags", :age.lte(28)).order(:name.desc).all.first.should == p4
+#    Person.where(:name.like('%w%')).all.map{|x| x.name}.should == [p3.name, p5.name]
+#    Person.where(:age.gt(28), :age.lt(75)).all.map{|x| x.name}.should == [p1.name, p5.name]
+#    Person.where("'jedi' IN tags").all.map{|x| x.name}.should == [p2.name, p3.name]
+#    Person.where("'fighter' IN tags", :age.lte(28)).order(:name.desc).all.first.name.should == p4.name
   end
 
 end

@@ -1,81 +1,17 @@
-require 'rubygems'
-require 'active_model'
-require 'active_support/core_ext/class/attribute_accessors'
-require 'active_support/core_ext/kernel'
-require 'active_support/core_ext/class/attribute'
-require 'orientdb'
-
-require 'model/conversion'
-require 'model/attributes'
-require 'model/validations'
-require 'model/relations'
-require 'model/query'
-
 class OrientDB::AR::Base
-  include ActiveModel::AttributeMethods
-  include Comparable
 
-  extend ActiveModel::Translation
-  extend ActiveModel::Callbacks
+  def self.embeddable?
+    false
+  end
 
-  include OrientDB::AR::Attributes
-  include OrientDB::AR::Conversion
-  include OrientDB::AR::Validations
-
-  include ActiveModel::Serializers::JSON
-  include ActiveModel::Serializers::Xml
-
-  define_model_callbacks :save, :delete
-
-  class_attribute :connection
+  include OrientDB::AR::DocumentMixin
 
   class_inheritable_hash :fields
   self.fields = ActiveSupport::OrderedHash.new
 
-  attr_reader :odocument
+  class_attribute :connection
 
-  def initialize(fields = {})
-    @odocument          = self.class.new_document
-    @changed_attributes = {}
-    @errors             = ActiveModel::Errors.new(self)
-    fields.each { |k, v| send "#{k}=", v }
-  end
-
-  def field?(name)
-    res = @odocument.field?(name)
-    res
-  end
-
-  def respond_to?(method_name)
-    # Simple field value lookup
-    return true if field?(method_name)
-    # Dirty
-    return true if method_name.to_s =~ /(\w*)(_changed\?|_change|_will_change!|_was)$/ && field?($1)
-    # Setter
-    return true if method_name.to_s =~ /(.*?)=$/
-    # Boolean
-    return true if method_name.to_s =~ /(.*?)?$/ && field?($1)
-    # Unknown pattern
-    super
-  end
-
-  def method_missing(method_name, *args, &blk)
-    # Simple field value lookup
-    return self[method_name] if field?(method_name)
-    # Dirty
-    if method_name.to_s =~ /(\w*)(_changed\?|_change|_will_change!|_was)$/ && field?($1)
-      __send__("attribute#{$2}", $1)
-      # Setter
-    elsif method_name.to_s =~ /(.*?)=$/
-      self[$1] = args.first
-      # Boolean
-    elsif method_name.to_s =~ /(.*?)?$/ && field?($1)
-      !!self[$1]
-      # Unknown pattern
-    else
-      super
-    end
-  end
+  define_model_callbacks :save, :delete
 
   def save
     _run_save_callbacks do
@@ -107,18 +43,6 @@ class OrientDB::AR::Base
     saved? && !deleted?
   end
 
-  def inspect
-    attrs       = attributes.map { |k, v| "#{k}:#{v.inspect}" }.join(' ')
-    super_klass = self.class.descends_from_base? ? '' : "(#{self.class.superclass.name})"
-    %{#<#{self.class.name}#{super_klass}:#{@odocument.rid} #{attrs}>}
-  end
-
-  alias :to_s :inspect
-
-  def <=>(other)
-    to_s <=> other.to_s
-  end
-
   class << self
 
     include OrientDB::AR::Relations
@@ -142,10 +66,6 @@ class OrientDB::AR::Base
       @oclass
     end
 
-    def embedded?
-      false
-    end
-
     def field(name, type, options = {})
       name = name.to_sym
       if fields.key? name
@@ -164,11 +84,6 @@ class OrientDB::AR::Base
         oclass.add field, options[:type], options.except(:type)
       end
       self
-    end
-
-    def new_document(fields = {})
-      oclass
-      OrientDB::Document.new connection, oclass_name, fields
     end
 
     def create(fields = {})
@@ -209,17 +124,6 @@ class OrientDB::AR::Base
 
     def clear
       oclass.truncate
-    end
-
-    def new_from_doc(doc)
-      klass = doc.getClassName.constantize
-      obj   = klass.new
-      obj.instance_variable_set "@odocument", doc
-      obj
-    end
-
-    def new_from_docs(docs)
-      docs.map { |doc| new_from_doc doc }
     end
   end
 

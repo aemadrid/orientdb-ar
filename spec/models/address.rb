@@ -5,4 +5,3 @@ class Address < OrientDB::AR::Embedded
   field :zip, :string
   field :country, :string
 end
-Address.schema!
