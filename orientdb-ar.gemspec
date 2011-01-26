@@ -5,12 +5,12 @@
 
 Gem::Specification.new do |s|
   s.name = %q{orientdb-ar}
-  s.version = "0.0.4"
+  s.version = "0.0.5"
   s.platform = %q{jruby}
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.3.6") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Madrid"]
-  s.date = %q{2011-01-25}
+  s.date = %q{2011-01-26}
   s.default_executable = %q{orientdbar_console}
   s.description = %q{Active Model wrappers to persist Ruby objects under OrientDB in JRuby.}
   s.email = ["aemadrid@gmail.com"]
@@ -28,16 +28,20 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "bin/orientdbar_console",
-    "lib/model/attributes.rb",
-    "lib/model/base.rb",
-    "lib/model/conversion.rb",
-    "lib/model/document_mixin.rb",
-    "lib/model/embedded.rb",
-    "lib/model/ext.rb",
-    "lib/model/query.rb",
-    "lib/model/relations.rb",
-    "lib/model/validations.rb",
     "lib/orientdb-ar.rb",
+    "lib/orientdb-ar/attributes.rb",
+    "lib/orientdb-ar/base.rb",
+    "lib/orientdb-ar/conversion.rb",
+    "lib/orientdb-ar/document_mixin.rb",
+    "lib/orientdb-ar/embedded.rb",
+    "lib/orientdb-ar/ext.rb",
+    "lib/orientdb-ar/relations.rb",
+    "lib/orientdb-ar/sql.rb",
+    "lib/orientdb-ar/sql/delete.rb",
+    "lib/orientdb-ar/sql/insert.rb",
+    "lib/orientdb-ar/sql/query.rb",
+    "lib/orientdb-ar/sql/update.rb",
+    "lib/orientdb-ar/validations.rb",
     "orientdb-ar.gemspec",
     "spec/base_spec.rb",
     "spec/dirty_spec.rb",
@@ -64,18 +68,18 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<orientdb>, ["= 0.0.14"])
+      s.add_runtime_dependency(%q<orientdb>, ["= 0.0.15"])
       s.add_runtime_dependency(%q<activemodel>, [">= 3.0.3"])
       s.add_development_dependency(%q<awesome_print>, [">= 0"])
       s.add_development_dependency(%q<rspec>, [">= 2.4"])
     else
-      s.add_dependency(%q<orientdb>, ["= 0.0.14"])
+      s.add_dependency(%q<orientdb>, ["= 0.0.15"])
       s.add_dependency(%q<activemodel>, [">= 3.0.3"])
       s.add_dependency(%q<awesome_print>, [">= 0"])
       s.add_dependency(%q<rspec>, [">= 2.4"])
     end
   else
-    s.add_dependency(%q<orientdb>, ["= 0.0.14"])
+    s.add_dependency(%q<orientdb>, ["= 0.0.15"])
     s.add_dependency(%q<activemodel>, [">= 3.0.3"])
     s.add_dependency(%q<awesome_print>, [">= 0"])
     s.add_dependency(%q<rspec>, [">= 2.4"])
