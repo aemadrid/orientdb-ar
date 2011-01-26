@@ -11,6 +11,7 @@ require 'model/attributes'
 require 'model/validations'
 require 'model/relations'
 require 'model/query'
+require 'model/commands'
 
 module OrientDB::AR::DocumentMixin
 

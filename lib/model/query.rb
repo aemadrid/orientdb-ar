@@ -4,7 +4,7 @@ class OrientDB::AR::Query
 
   def initialize(model, query = OrientDB::SQL::Query.new)
     @model, @query = model, query
-    @query.from model.name
+    @query.from model.oclass_name
   end
 
   %w{ select select! where where! and or and_not or_not order order! limit limit! range range! }.each do |name|
@@ -23,7 +23,11 @@ class OrientDB::AR::Query
   end
 
   def results
-    model.connection.query(query).map
+    model.connection.all(query).map
+  end
+
+  def update(*args)
+    OrientDB::AR::Update.from_query self, *args
   end
 
   def inspect
