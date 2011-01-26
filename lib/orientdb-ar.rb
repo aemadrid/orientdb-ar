@@ -5,7 +5,9 @@ module OrientDB
   end
 end
 
-require 'model/document_mixin'
-require 'model/base'
-require 'model/embedded'
-require 'model/ext'
+require 'orientdb-ar/document_mixin'
+require 'orientdb-ar/base'
+require 'orientdb-ar/embedded'
+require 'orientdb-ar/ext'
+
+OrientDB::SQL.monkey_patch!

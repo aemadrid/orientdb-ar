@@ -26,8 +26,16 @@ class OrientDB::AR::Query
     model.connection.all(query).map
   end
 
+  def first_result
+    model.connection.first(query)
+  end
+
   def update(*args)
-    OrientDB::AR::Update.from_query self, *args
+    OrientDB::AR::Update.from_query(self, *args).run
+  end
+
+  def delete
+    OrientDB::AR::Delete.from_query(self).run
   end
 
   def inspect

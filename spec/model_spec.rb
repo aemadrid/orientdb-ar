@@ -10,9 +10,9 @@ describe "Model" do
     Person.new.should be_a_kind_of Person
     Person.oclass_name.should == 'Person'
     Person.fields.keys.should == [:name, :age, :tags]
-    Person.fields[:name].should == {:type => :string, :not_null => true}
-    Person.fields[:age].should == {:type => :int}
-    Person.fields[:tags].should == {:type => [:list, :string]}
+    Person.fields[:name].should == { :type => :string, :not_null => true }
+    Person.fields[:age].should == { :type => :int }
+    Person.fields[:tags].should == { :type => [:list, :string] }
   end
 
   it "should create working models" do
@@ -31,7 +31,7 @@ describe "Model" do
   it "should handle embedded models as relations" do
     Customer.clear
 
-    a = Address.new :street => "123 S Main", :city => "Salt Lake", :state => "UT", :country => "USA"
+    a  = Address.new :street => "123 S Main", :city => "Salt Lake", :state => "UT", :country => "USA"
     p1 = PhoneNumber.new :number => "123456789"
     p2 = PhoneNumber.new :number => "987654321"
     c1 = Customer.create :name => "Albert Einstein", :number => 1, :address => a, :phones => [p1, p2]
@@ -54,10 +54,48 @@ describe "Model" do
     Person.where(:age.gt(28), :age.lt(75)).all.should == [p1, p5]
     Person.where("'jedi' IN tags").all.should == [p2, p3]
     Person.where("'fighter' IN tags", :age.lte(28)).order(:name.desc).all.first.should == p4
-#    Person.where(:name.like('%w%')).all.map{|x| x.name}.should == [p3.name, p5.name]
-#    Person.where(:age.gt(28), :age.lt(75)).all.map{|x| x.name}.should == [p1.name, p5.name]
-#    Person.where("'jedi' IN tags").all.map{|x| x.name}.should == [p2.name, p3.name]
-#    Person.where("'fighter' IN tags", :age.lte(28)).order(:name.desc).all.first.name.should == p4.name
   end
 
+  it "should update models" do
+    Person.clear
+
+    p1 = Person.create :name => "Hans Solo", :age => 38, :tags => %w{ fighter pilot }
+    p2 = Person.create :name => "Yoda", :age => 387, :tags => %w{ genius jedi }
+    p3 = Person.create :name => "Luke Skywalker", :age => 28, :tags => %w{ jedi fighter pilot }
+
+    Person.where(:name => "Hans Solo").update(:name => "Hans Meister")
+    Person.where(:name => "Hans Meister").all.map { |x| x.rid }.should == [p1.rid]
+    p1.reload
+    Person.where(:name => "Hans Meister").all.should == [p1]
+
+
+    Person.update(:age => 45)
+    Person.where(:age => 45).all.map { |x| x.name }.should == [p1.name, p2.name, p3.name]
+  end
+
+  it "should delete models" do
+    Person.clear
+
+    Person.create :name => "Hans Solo", :age => 38, :tags => %w{ fighter pilot }
+    Person.create :name => "Yoda", :age => 387, :tags => %w{ genius jedi }
+    Person.create :name => "Luke Skywalker", :age => 28, :tags => %w{ jedi fighter pilot }
+
+    Person.count.should == 3
+
+    Person.where(:name => "Hans Solo").delete
+    Person.count.should == 2
+
+    Person.delete
+    Person.count.should == 0
+  end
+
+  it "should insert models" do
+    Person.clear
+
+    p1 = Person.insert :name => "Hans Solo", :age => 38, :tags => %w{ fighter pilot }
+    Person.count.should == 1
+
+    p2 = Person.first
+    p1.should == p2
+  end
 end

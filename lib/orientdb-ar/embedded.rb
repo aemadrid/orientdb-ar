@@ -4,6 +4,7 @@ class OrientDB::AR::Embedded
     true
   end
 
+  include ActiveModel::AttributeMethods
   include OrientDB::AR::DocumentMixin
 
   class_inheritable_hash :fields
@@ -14,6 +15,10 @@ class OrientDB::AR::Embedded
   end
 
   def delete
+    raise "Not implemented on Embedded models"
+  end
+
+  def reload
     raise "Not implemented on Embedded models"
   end
 
@@ -39,12 +44,12 @@ class OrientDB::AR::Embedded
       @oclass ||= connection.get_or_create_class oclass_name, fields.dup
     end
 
-    def schema!
-      raise "Not implemented on Embedded models"
-    end
-
     def descends_from_base?
       superclass && superclass == OrientDB::AR::Embedded
+    end
+
+    def schema!
+      raise "Not implemented on Embedded models"
     end
 
     def create(fields = {})
@@ -78,6 +83,22 @@ class OrientDB::AR::Embedded
     end
 
     def first(conditions = {})
+      raise "Not implemented on Embedded models"
+    end
+
+    def update(*args)
+      raise "Not implemented on Embedded models"
+    end
+
+    def delete(*args)
+      raise "Not implemented on Embedded models"
+    end
+
+    def insert(*args)
+      raise "Not implemented on Embedded models"
+    end
+
+    def count
       raise "Not implemented on Embedded models"
     end
 

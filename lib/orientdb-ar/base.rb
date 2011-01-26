@@ -4,6 +4,7 @@ class OrientDB::AR::Base
     false
   end
 
+  include ActiveModel::AttributeMethods
   include OrientDB::AR::DocumentMixin
 
   class_inheritable_hash :fields
@@ -29,6 +30,14 @@ class OrientDB::AR::Base
       @deleted = true
     end
     true
+  end
+
+  def reload
+    raise "Not persisted, cannot reload" unless persisted?
+    @odocument = OrientDB::AR::Query.new(self.class).where('@rid' => rid.lit).first_result
+    @changed_attributes = { }
+    @errors             = ActiveModel::Errors.new(self)
+    self
   end
 
   def saved?
@@ -120,6 +129,22 @@ class OrientDB::AR::Base
 
     def first(conditions = {})
       OrientDB::AR::Query.new(self).where(conditions).first
+    end
+
+    def update(*args)
+      OrientDB::AR::Update.new(self).values(*args).run
+    end
+
+    def delete(*args)
+      OrientDB::AR::Delete.new(self).where(*args).run
+    end
+
+    def insert(*args)
+      from_orientdb OrientDB::AR::Insert.new(self).fields(*args).run
+    end
+
+    def count
+      oclass.count
     end
 
     def clear

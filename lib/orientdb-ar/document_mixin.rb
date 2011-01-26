@@ -6,17 +6,14 @@ require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/class/inheritable_attributes'
 require 'orientdb'
 
-require 'model/conversion'
-require 'model/attributes'
-require 'model/validations'
-require 'model/relations'
-require 'model/query'
-require 'model/commands'
-
+require 'orientdb-ar/conversion'
+require 'orientdb-ar/attributes'
+require 'orientdb-ar/validations'
+require 'orientdb-ar/relations'
+require 'orientdb-ar/sql'
 module OrientDB::AR::DocumentMixin
 
   include Comparable
-  include ActiveModel::AttributeMethods
 
   include OrientDB::AR::Attributes
   include OrientDB::AR::Conversion
@@ -34,9 +31,9 @@ module OrientDB::AR::DocumentMixin
 
   attr_reader :odocument
 
-  def initialize(fields = {})
+  def initialize(fields = { })
     @odocument          = self.class.new_document
-    @changed_attributes = {}
+    @changed_attributes = { }
     @errors             = ActiveModel::Errors.new(self)
     fields.each { |k, v| send "#{k}=", v }
   end
@@ -92,6 +89,10 @@ module OrientDB::AR::DocumentMixin
     self.class.oclass_name
   end
 
+  def rid
+    @odocument.rid
+  end
+
   def inspect
     attrs       = attributes.map { |k, v| "#{k}:#{v.inspect}" }.join(' ')
     super_klass = self.class.descends_from_base? ? '' : "(#{self.class.superclass.name})"
@@ -112,17 +113,31 @@ module OrientDB::AR::DocumentMixin
       @oclass_name ||= name.to_s.gsub('::', '__')
     end
 
-    def field(name, type, options = {})
+    def field(name, type, options = { })
       name = name.to_sym
       if fields.key? name
         puts "Already defined field [#{name}]"
       else
-        fields[name] = {:type => type}.update options
+        fields[name] = { :type => type }.update options
       end
     end
 
     def new_document
       OrientDB::Document.new connection, oclass_name
+    end
+
+    def from_orientdb(value)
+      value.respond_to?(:to_orientdb_ar) ? value.to_orientdb_ar : value
+    end
+
+    def to_orientdb(value)
+      if value.respond_to?(:to_orientdb)
+        value.to_orientdb
+      elsif value.respond_to?(:jruby_value)
+        value.jruby_value
+      else
+        value
+      end
     end
   end
 

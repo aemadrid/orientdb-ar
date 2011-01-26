@@ -50,3 +50,9 @@ class Hash
     inject({ }) { |h, (k, v)| h[k] = v.respond_to?(:to_orientdb_ar) ? v.to_orientdb_ar : v; h }
   end
 end
+
+class Java::JavaUtil::ArrayList
+  def to_orientdb_ar
+    map { |x| x.respond_to?(:to_orientdb_ar) ? x.to_orientdb_ar : x }
+  end
+end

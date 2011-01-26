@@ -35,14 +35,12 @@ module OrientDB::AR
 
       class_eval <<-eorb, __FILE__, __LINE__ + 1
         def #{name}=(value)                                 # def addresses=(value)
-          puts "#{name}=(\#{value.inspect})"
           self[:#{name}]                                    #   self[:addresses]
         end                                                 # end
       eorb
 
       class_eval <<-eorb, __FILE__, __LINE__ + 1
         def add_#{name.singularize}(value)                  # def add_address(value)
-          puts "add_#{name}=(\#{value.inspect})"
           self[:#{name}] ||= []                             #   self[:addresses] ||= []
           self[:#{name}] << value                           #   self[:addresses] << value
           #{name}                                           #   addresses

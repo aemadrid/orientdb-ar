@@ -5,7 +5,8 @@ module OrientDB::AR
 
     def attribute_names
       schema_names = self.class.fields.keys.map { |x| x.to_s }
-      (schema_names + @odocument.field_names.map).uniq
+      field_names = @odocument.field_names.map { |x| x.to_s }
+      (schema_names + field_names).uniq
     end
 
     def attributes
