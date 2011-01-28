@@ -4,4 +4,6 @@ class Address < OrientDB::AR::Embedded
   field :state, :string
   field :zip, :string
   field :country, :string
+
+  validates_presence_of :street, :city, :state
 end

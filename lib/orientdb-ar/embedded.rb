@@ -1,14 +1,9 @@
 class OrientDB::AR::Embedded
 
-  def self.embeddable?
-    true
-  end
-
   include ActiveModel::AttributeMethods
   include OrientDB::AR::DocumentMixin
 
-  class_inheritable_hash :fields
-  self.fields = ActiveSupport::OrderedHash.new
+  define_model_callbacks :validation
 
   def save
     raise "Not implemented on Embedded models"
@@ -36,6 +31,12 @@ class OrientDB::AR::Embedded
 
   class << self
 
+    include OrientDB::AR::Relations
+
+    def embeddable?
+      true
+    end
+
     def connection
       OrientDB::AR::Base.connection
     end
@@ -52,7 +53,7 @@ class OrientDB::AR::Embedded
       raise "Not implemented on Embedded models"
     end
 
-    def create(fields = {})
+    def create(fields = { })
       raise "Not implemented on Embedded models"
     end
 
@@ -78,11 +79,11 @@ class OrientDB::AR::Embedded
       raise "Not implemented on Embedded models"
     end
 
-    def all(conditions = {})
+    def all(conditions = { })
       raise "Not implemented on Embedded models"
     end
 
-    def first(conditions = {})
+    def first(conditions = { })
       raise "Not implemented on Embedded models"
     end
 
@@ -106,5 +107,4 @@ class OrientDB::AR::Embedded
       raise "Not implemented on Embedded models"
     end
   end
-
 end

@@ -18,12 +18,11 @@ module OrientDB::AR
     end
 
     def [](attr)
-      res = @odocument[attr]
-      res.respond_to?(:to_orientdb_ar) ? res.to_orientdb_ar : res
+      self.class.from_orientdb @odocument[attr]
     end
 
     def []=(attr, value)
-      value = value.respond_to?(:to_orientdb) ? value.to_orientdb : value
+      value = self.class.to_orientdb value
       old_value = self[attr]
       return old_value if value == old_value
       attribute_will_change!(attr)

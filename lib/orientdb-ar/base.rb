@@ -1,28 +1,38 @@
 class OrientDB::AR::Base
 
-  def self.embeddable?
-    false
-  end
-
   include ActiveModel::AttributeMethods
   include OrientDB::AR::DocumentMixin
 
-  class_inheritable_hash :fields
-  self.fields = ActiveSupport::OrderedHash.new
-
   class_attribute :connection
 
-  define_model_callbacks :save, :delete
+  define_model_callbacks :validation, :save, :delete
 
-  def save
+  def save(perform_validations = true)
     _run_save_callbacks do
-      @odocument.save
-      @saved              = true
-      @previously_changed = @changed_attributes
-      @changed_attributes.clear
+      if perform_validations
+        validate
+        if @last_validation_result
+          save_without_validations
+        else
+          false
+        end
+      else
+        save_without_validations
+      end
     end
+  end
+
+  def save_without_validations
+    puts "@odocument : #{@odocument.inspect}"
+    puts "@odocument : #{@odocument.toString}"
+    @odocument.save
+    @saved              = true
+    @previously_changed = @changed_attributes
+    @changed_attributes.clear
     true
   end
+
+  private :save_without_validations
 
   def delete
     _run_delete_callbacks do
@@ -34,7 +44,7 @@ class OrientDB::AR::Base
 
   def reload
     raise "Not persisted, cannot reload" unless persisted?
-    @odocument = OrientDB::AR::Query.new(self.class).where('@rid' => rid.lit).first_result
+    @odocument          = OrientDB::AR::Query.new(self.class).where('@rid' => rid.lit).first_result
     @changed_attributes = { }
     @errors             = ActiveModel::Errors.new(self)
     self
@@ -58,13 +68,13 @@ class OrientDB::AR::Base
 
     attr_writer :oclass_name
 
-    def oclass_name
-      @oclass_name ||= name.to_s
+    def embeddable?
+      false
     end
 
     def oclass
       unless defined?(@oclass)
-        options = {}
+        options = { }
         unless descends_from_base?
           super_oclass          = superclass.oclass
           options[:super]       = super_oclass
@@ -75,12 +85,12 @@ class OrientDB::AR::Base
       @oclass
     end
 
-    def field(name, type, options = {})
+    def field(name, type, options = { })
       name = name.to_sym
       if fields.key? name
         puts "Already defined field [#{name}]"
       else
-        fields[name] = {:type => type}.update options
+        fields[name] = { :type => type }.update options
       end
     end
 
@@ -95,7 +105,7 @@ class OrientDB::AR::Base
       self
     end
 
-    def create(fields = {})
+    def create(fields = { })
       obj = new fields
       obj.save
       obj
@@ -123,11 +133,11 @@ class OrientDB::AR::Base
       OrientDB::AR::Query.new(self).range(lower_rid, upper_rid)
     end
 
-    def all(conditions = {})
+    def all(conditions = { })
       OrientDB::AR::Query.new(self).where(conditions).all
     end
 
-    def first(conditions = {})
+    def first(conditions = { })
       OrientDB::AR::Query.new(self).where(conditions).first
     end
 
@@ -151,7 +161,6 @@ class OrientDB::AR::Base
       oclass.truncate
     end
   end
-
 end
 
 OrientDB::AR::Base.include_root_in_json = false

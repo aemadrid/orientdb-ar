@@ -26,11 +26,9 @@ unless defined?(SPEC_HELPER_LOADED)
   OrientDB::AR::Base.connection = OrientDB::DocumentDatabase.new("local:#{TEST_DB_PATH}/test").create
   puts ">> Connection : #{OrientDB::AR::Base.connection}"
 
-  require SPEC_ROOT + '/models/person'
-  require SPEC_ROOT + '/models/simple_person'
-  require SPEC_ROOT + '/models/phone_number'
-  require SPEC_ROOT + '/models/address'
-  require SPEC_ROOT + '/models/customer'
+  %w{ person simple_person address phone_number customer flo_admin product invoice_line invoice }.each do |name|
+    require SPEC_ROOT + '/models/' + name
+  end
 
   require SPEC_ROOT + '/lint_behavior'
 

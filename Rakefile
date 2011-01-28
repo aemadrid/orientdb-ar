@@ -19,6 +19,7 @@ begin
 
     gem.add_dependency "orientdb", "0.0.15"
     gem.add_dependency "activemodel", ">= 3.0.3"
+    gem.add_dependency "jnunemaker-validatable", "1.8.4"
     gem.add_development_dependency "awesome_print"
     gem.add_development_dependency "rspec", ">= 2.4"
 

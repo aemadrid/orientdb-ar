@@ -1,53 +1,6 @@
 module OrientDB::AR
   module Relations
 
-    def embedds_one(klass, options = {})
-      klass = klass_for klass
-      name = options[:name].to_s || field_name_for(klass, true)
-
-      field name, [OrientDB::FIELD_TYPES[:embedded], klass.oclass]
-
-      class_eval <<-eorb, __FILE__, __LINE__ + 1
-        def #{name}                                                          # def address
-          self[:#{name}]                                                     #   self[:address]
-        end                                                                  # end
-      eorb
-
-      class_eval <<-eorb, __FILE__, __LINE__ + 1
-        def #{name}=(value)                                                  # def address=(value)
-          self[:#{name}] = value                                             #   self[:address] = value.odocument
-          #{name}                                                            #   address
-        end                                                                  # end
-      eorb
-    end
-
-    def embedds_many(klass, options = {})
-      klass = klass_for klass
-      name = options[:name].to_s || field_name_for(klass, false)
-
-      field name, [OrientDB::FIELD_TYPES[:embedded_list], klass.oclass]
-
-      class_eval <<-eorb, __FILE__, __LINE__ + 1
-        def #{name}                                         # def addresses
-          self[:#{name}]                                    #   self[:addresses]
-        end                                                 # end
-      eorb
-
-      class_eval <<-eorb, __FILE__, __LINE__ + 1
-        def #{name}=(value)                                 # def addresses=(value)
-          self[:#{name}]                                    #   self[:addresses]
-        end                                                 # end
-      eorb
-
-      class_eval <<-eorb, __FILE__, __LINE__ + 1
-        def add_#{name.singularize}(value)                  # def add_address(value)
-          self[:#{name}] ||= []                             #   self[:addresses] ||= []
-          self[:#{name}] << value                           #   self[:addresses] << value
-          #{name}                                           #   addresses
-        end                                                 # end
-      eorb
-    end
-
     private
 
     def klass_for(klass)
@@ -57,9 +10,18 @@ module OrientDB::AR
       raise "Problem getting klass for [#{klass}]"
     end
 
-    def field_name_for(klass, singular)
-      klass.to_s.underscore.send(singular ? :singularize : :pluralize).gsub('/', '__')
+    def field_name_for(options, klass, singular)
+      if options[:name].blank?
+        options[:name] = klass.to_s.underscore.send(singular ? :singularize : :pluralize).gsub('/', '__')
+      else
+        options[:name].to_s
+      end
     end
 
   end
 end
+
+require 'orientdb-ar/relations/embedds_one'
+require 'orientdb-ar/relations/embedds_many'
+require 'orientdb-ar/relations/links_one'
+require 'orientdb-ar/relations/links_many'

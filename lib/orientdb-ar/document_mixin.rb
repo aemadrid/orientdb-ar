@@ -4,28 +4,43 @@ require 'active_support/core_ext/class/attribute_accessors'
 require 'active_support/core_ext/kernel'
 require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/class/inheritable_attributes'
+require 'active_support/core_ext/module/aliasing'
 require 'orientdb'
+require 'validatable'
 
 require 'orientdb-ar/conversion'
 require 'orientdb-ar/attributes'
-require 'orientdb-ar/validations'
 require 'orientdb-ar/relations'
 require 'orientdb-ar/sql'
+
 module OrientDB::AR::DocumentMixin
 
-  include Comparable
-
-  include OrientDB::AR::Attributes
-  include OrientDB::AR::Conversion
-  include OrientDB::AR::Validations
-
   def self.included(base)
-    base.extend ActiveModel::Translation
-    base.extend ActiveModel::Callbacks unless base.embeddable?
+    base.class_eval do
+      include Comparable
 
-    base.send :include, ActiveModel::Serializers::JSON
-    base.send :include, ActiveModel::Serializers::Xml
+      include Validatable
+      alias_method_chain :valid?, :default_group
 
+      include OrientDB::AR::Attributes
+      include OrientDB::AR::Conversion
+
+      extend ActiveModel::Translation
+      include ActiveModel::Serializers::JSON
+      include ActiveModel::Serializers::Xml
+
+      extend ActiveModel::Callbacks
+
+      class_inheritable_hash :fields
+      self.fields = ActiveSupport::OrderedHash.new
+
+      class_inheritable_hash :relationships
+      self.relationships = ActiveSupport::OrderedHash.new
+
+      class_inheritable_accessor :default_validation_group
+
+      class_attribute :connection
+    end
     base.extend OrientDB::AR::DocumentMixin::ClassMethods
   end
 
@@ -38,8 +53,51 @@ module OrientDB::AR::DocumentMixin
     fields.each { |k, v| send "#{k}=", v }
   end
 
+  def human_id
+    rid
+  end
+
   def field?(name)
     @odocument.field?(name)
+  end
+
+  def validate
+    @last_validation_result = nil
+    _run_validation_callbacks do
+      @last_validation_result = valid?
+    end
+    @last_validation_result
+  end
+
+  def valid_with_default_group?
+    valid_for_group?(default_validation_group) && related_valid?
+  end
+
+  def related_valid?
+    res = related.all? do |rel_name, row_or_coll|
+      case row_or_coll
+        when Array
+          row_or_coll.all? do |result|
+            result.validate_to_parent errors, rel_name
+          end
+        else
+          row_or_coll.validate_to_parent errors, rel_name
+      end
+    end
+    res
+  end
+
+  def validate_to_parent(parent_errors, rel_name)
+    return true if valid?
+    errors.full_messages.each { |msg| parent_errors[rel_name] = "#{human_id} #{msg}" }
+    false
+  end
+
+  def related
+    relationships.map do |rel_name, options|
+      rel_obj = send options[:name]
+      rel_obj.blank? ? nil : [rel_name, rel_obj]
+    end.compact
   end
 
   def respond_to?(method_name)
@@ -96,7 +154,8 @@ module OrientDB::AR::DocumentMixin
   def inspect
     attrs       = attributes.map { |k, v| "#{k}:#{v.inspect}" }.join(' ')
     super_klass = self.class.descends_from_base? ? '' : "(#{self.class.superclass.name})"
-    %{#<#{self.class.name}#{super_klass}:#{@odocument.rid} #{attrs}>}
+    rid_str     = embedded? ? '(E)' : ":#{@odocument.rid}"
+    %{#<#{self.class.name}#{super_klass}#{rid_str} #{attrs}>}
   end
 
   alias :to_s :inspect
