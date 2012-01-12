@@ -60,12 +60,12 @@ describe "Model" do
       c1 = Customer.create :name => "Albert Einstein", :number => 1, :phones => [p1, p2], :age => 35
       c1.saved?.should == true
       c1.address.should == nil
-      c1.phones.should == [p1,p2]
+      c1.phones.should == [p1, p2]
 
       c2 = Customer.first
       c1.should == c2
       c2.address.should == nil
-      c2.phones.should == [p1,p2]
+      c2.phones.should == [p1, p2]
     end
 
     it "should handle mixed embedded models as relations" do
@@ -78,12 +78,12 @@ describe "Model" do
       c1 = Customer.create :name => "Albert Einstein", :number => 1, :address => a, :phones => [p1, p2], :age => 35
       c1.saved?.should == true
       c1.address.should == a
-      c1.phones.should == [p1,p2]
+      c1.phones.should == [p1, p2]
 
       c2 = Customer.first
       c1.should == c2
       c2.address.should == a
-      c2.phones.should == [p1,p2]
+      c2.phones.should == [p1, p2]
     end
   end
 
@@ -91,25 +91,29 @@ describe "Model" do
     it "should handle mixed linked models as relations" do
       Invoice.clear; InvoiceLine.clear; Product.clear; Customer.clear
 
-      c1 = Customer.create :name => "Generous Buyer", :age => 38, :number => 1001
-      p1 = Product.create :sku => "h1", :title => "Hammer", :price => 7.25
-      p2 = Product.create :sku => "n2", :title => "9in Nail", :price => 0.12
-      l1 = InvoiceLine.create :product => p1, :quantity => 1, :price => p1.price
-      l2 = InvoiceLine.create :product => p2, :quantity => 10, :price => p2.price
+      c1    = Customer.create :name => "Generous Buyer", :age => 38, :number => 1001
+      p1    = Product.create :sku => "h1", :title => "Hammer", :price => 7.25
+      p2    = Product.create :sku => "n2", :title => "9in Nail", :price => 0.12
+      l1    = InvoiceLine.create :product => p1, :quantity => 1, :price => p1.price
+      l2    = InvoiceLine.create :product => p2, :quantity => 10, :price => p2.price
       total = l1.quantity * l1.price + l2.quantity * l2.price
-      i1 = Invoice.create :number => 417, :customer => c1, :sold_on => Date.today, :total => total, :lines => [l1, l2]
+      i1    = Invoice.create :number => 417, :customer => c1, :sold_on => Date.today, :total => total, :lines => [l1, l2]
+      l3    = InvoiceLine.create :product => p1, :quantity => 2, :price => p1.price
+      i3    = Invoice.create :number => 418, :customer => c1, :sold_on => Date.today, :lines => [l3]
+      l4    = InvoiceLine.create :product => p2, :quantity => 3, :price => p2.price
+      i4    = Invoice.create :number => 419, :customer => c1, :sold_on => Date.today, :lines => [l4]
       i1.saved?.should == true
       i1.customer.should == c1
-      i1.lines.should == [l1,l2]
+      i1.lines.should == [l1, l2]
       i1.lines[0].product.should == p1
       i1.lines[1].product.should == p2
 
       i2 = Invoice.first
       i2.customer.should == c1
-      i2.lines.should == [l1,l2]
-      i2.lines[0].product.should == p1
-      i2.lines[1].product.should == p2
-      i2.should == i1
+      i2.lines.map { |x| x.rid }.should == [l1.rid, l2.rid]
+      i2.lines[0].product.rid.should == p1.rid
+      i2.lines[1].product.rid.should == p2.rid
+      i2.rid.should == i1.rid
     end
   end
 
@@ -221,7 +225,7 @@ describe "Model" do
       c1.build_address :street => "4647 Pagentry", :city => "Sandy"
       c1.valid?.should == false
       c1.errors.size.should == 1
-      c1.errors[:address].should == ["-1:-1 State can't be empty"]
+      c1.errors[:address].should == ["#-1:-1 State can't be empty"]
     end
   end
 end

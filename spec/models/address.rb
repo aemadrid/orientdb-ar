@@ -7,3 +7,4 @@ class Address < OrientDB::AR::Embedded
 
   validates_presence_of :street, :city, :state
 end
+Address.schema!

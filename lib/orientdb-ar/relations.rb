@@ -3,19 +3,23 @@ module OrientDB::AR
 
     private
 
-    def klass_for(klass)
-      return klass if klass.class.name == 'Class'
-      klass.to_s.singularize.camelize.constantize
-    rescue
-      raise "Problem getting klass for [#{klass}]"
+    def check_rel_options(klass_name, options, plurality, default = nil)
+      klass_name          = klass_name_for klass_name
+      options[:plurality] ||= plurality
+      options[:name]      ||= field_name_for klass_name, plurality
+      options[:name]      = options[:name].to_s
+      options[:default]   ||= default
+      [klass_name, options]
     end
 
-    def field_name_for(options, klass, singular)
-      if options[:name].blank?
-        options[:name] = klass.to_s.underscore.send(singular ? :singularize : :pluralize).gsub('/', '__')
-      else
-        options[:name].to_s
-      end
+    def klass_name_for(klass_name)
+      return klass_name.name if klass_name.class.name == 'Class'
+      klass_name.to_s
+    end
+
+    def field_name_for(klass, plurality)
+      plurality_meth = plurality.to_s + 'ize'
+      klass.to_s.underscore.send(plurality_meth).gsub('/', '__')
     end
 
   end

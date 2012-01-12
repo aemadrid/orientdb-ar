@@ -1,6 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe "ActiveModel::Lint" do
+  include RspecRailsMatchers::Behavior::Lint
 
   describe Person do
     it_should_behave_like AnActiveModel
@@ -41,7 +42,7 @@ describe "ActiveModel::Lint" do
       @person.serializable_hash.should == {"name" => nil}
       @person.as_json.should == {"name" => nil}
       @person.to_json.should == %{{"name":null}}
-      @person.to_xml.should == "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<simple-person>\n  <name type=\"yaml\" nil=\"true\"></name>\n</simple-person>\n"
+      @person.to_xml.should == "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<simple-person>\n  <name nil=\"true\"></name>\n</simple-person>\n"
 
       @person.name = "Bob"
       @person.serializable_hash.should == {"name" => "Bob"}

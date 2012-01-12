@@ -23,8 +23,6 @@ class OrientDB::AR::Base
   end
 
   def save_without_validations
-    puts "@odocument : #{@odocument.inspect}"
-    puts "@odocument : #{@odocument.toString}"
     @odocument.save
     @saved              = true
     @previously_changed = @changed_attributes
@@ -98,13 +96,6 @@ class OrientDB::AR::Base
       superclass && superclass == OrientDB::AR::Base
     end
 
-    def schema!
-      fields.each do |field, options|
-        oclass.add field, options[:type], options.except(:type)
-      end
-      self
-    end
-
     def create(fields = { })
       obj = new fields
       obj.save
@@ -160,6 +151,8 @@ class OrientDB::AR::Base
     def clear
       oclass.truncate
     end
+
+
   end
 end
 

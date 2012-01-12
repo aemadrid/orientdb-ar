@@ -6,5 +6,9 @@ class InvoiceLine < OrientDB::AR::Base
 
   validates_presence_of :product, :quantity
 
+  def invoice
+    Invoice.where(:lines.contains(:@rid, rid.lit))
+  end
+
 end
 InvoiceLine.schema!

@@ -3,3 +3,4 @@ class PhoneNumber < OrientDB::AR::Embedded
   field :number, :string
   field :extension, :string
 end
+PhoneNumber.schema!

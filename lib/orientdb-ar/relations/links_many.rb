@@ -1,14 +1,13 @@
 module OrientDB::AR
   module Relations
 
-    def links_many(klass, options = { })
-      klass               = klass_for klass
-      name                = field_name_for options, klass, false
-      options[:default]   ||= []
+    def links_many(klass_name, options = { })
+      klass_name, options = check_rel_options klass_name, options, :plural, []
+      name = options[:name]
 
-      relationships[name] = options.merge :type => :links_many, :class_name => klass.name
+      relationships[name] = options.merge :type => :links_many, :class_name => klass_name
 
-      field name, [OrientDB::FIELD_TYPES[:link_list], klass.oclass]
+      field name, [OrientDB::FIELD_TYPES[:link_list], OrientDB::AR::Base.oclass_name_for(klass_name)]
 
       class_eval <<-eorb, __FILE__, __LINE__ + 1
         def #{name}                                         # def address
@@ -31,8 +30,14 @@ module OrientDB::AR
       eorb
 
       class_eval <<-eorb, __FILE__, __LINE__ + 1
-        def create_#{name}(fields = {})                     # def build_address(fields = {})
-          add_#{name} #{klass.name}.create fields           #   self[:addresses] = Address.create fields
+        def build_#{name}(fields = {})                      # def build_address(fields = {})
+          add_#{name} #{klass_name}.new fields              #   self[:addresses] = Address.new fields
+        end                                                 # end
+      eorb
+
+      class_eval <<-eorb, __FILE__, __LINE__ + 1
+        def create_#{name}(fields = {})                     # def create_address(fields = {})
+          add_#{name} #{klass_name}.create fields           #   self[:addresses] = Address.create fields
         end                                                 # end
       eorb
     end

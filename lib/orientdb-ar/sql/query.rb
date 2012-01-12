@@ -2,6 +2,12 @@ class OrientDB::AR::Query
 
   attr_accessor :model, :query
 
+  def self.for_oclass(name, query = OrientDB::SQL::Query.new)
+    obj = new OrientDB::AR::Base, query
+    obj.from OrientDB::AR::Base.oclass_name_for name
+    obj
+  end
+
   def initialize(model, query = OrientDB::SQL::Query.new)
     @model, @query = model, query
     @query.from model.oclass_name

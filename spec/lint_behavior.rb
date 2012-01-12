@@ -17,10 +17,10 @@ module RspecRailsMatchers
         it { should respond_to(:to_param) }
 
         it { should respond_to(:valid?) }
-        its(:valid?) { should be_a_boolean }
+        #its(:valid?) { should be_a_boolean }
 
         it { should respond_to(:persisted?) }
-        its(:persisted?) { should be_a_boolean }
+        #its(:persisted?) { should be_a_boolean }
 
         its(:class) { should respond_to(:model_name) }
 

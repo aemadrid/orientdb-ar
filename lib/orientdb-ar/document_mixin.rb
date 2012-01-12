@@ -168,8 +168,12 @@ module OrientDB::AR::DocumentMixin
 
     attr_writer :oclass_name
 
+    def oclass_name_for(value)
+      value.to_s.gsub('::', '__')
+    end
+
     def oclass_name
-      @oclass_name ||= name.to_s.gsub('::', '__')
+      @oclass_name ||= oclass_name_for name
     end
 
     def field(name, type, options = { })
@@ -179,6 +183,17 @@ module OrientDB::AR::DocumentMixin
       else
         fields[name] = { :type => type }.update options
       end
+    end
+
+    def schema!
+      fields.each do |field, options|
+        begin
+          oclass.add field, options[:type], options.except(:type)
+        rescue Exception => e
+          raise e unless e.message =~ /already exists/
+        end
+      end
+      self
     end
 
     def new_document

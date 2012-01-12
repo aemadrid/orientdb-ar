@@ -1,14 +1,13 @@
 module OrientDB::AR
   module Relations
 
-    def embedds_many(klass, options = { })
-      klass               = klass_for klass
-      name                = field_name_for options, klass, false
-      options[:default]   ||= []
+    def embedds_many(klass_name, options = { })
+      klass_name, options = check_rel_options klass_name, options, :plural, []
+      name = options[:name]
 
-      relationships[name] = options.merge :type => :embedds_many, :class_name => klass.name
+      relationships[name] = options.merge :type => :embedds_many, :class_name => klass_name
 
-      field name, [OrientDB::FIELD_TYPES[:embedded_list], klass.oclass]
+      field name, [OrientDB::FIELD_TYPES[:embedded_list], OrientDB::AR::Base.oclass_name_for(klass_name)]
 
       class_eval <<-eorb, __FILE__, __LINE__ + 1
         def #{name}                                         # def address
@@ -32,7 +31,7 @@ module OrientDB::AR
 
       class_eval <<-eorb, __FILE__, __LINE__ + 1
         def build_#{name}(fields = {})                      # def build_address(fields = {})
-          add_#{name} #{klass.name}.new fields              #   self[:addresses] = Address.new fields
+          add_#{name} #{klass_name}.new fields              #   self[:addresses] = Address.new fields
         end                                                 # end
       eorb
     end

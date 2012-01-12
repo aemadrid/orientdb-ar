@@ -49,10 +49,6 @@ class OrientDB::AR::Embedded
       superclass && superclass == OrientDB::AR::Embedded
     end
 
-    def schema!
-      raise "Not implemented on Embedded models"
-    end
-
     def create(fields = { })
       raise "Not implemented on Embedded models"
     end
